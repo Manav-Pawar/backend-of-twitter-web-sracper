@@ -60,48 +60,42 @@ const Trend = mongoose.model('Trend', TrendSchema);
 // Selenium scraping function
 async function scrapeTrends() {
   const options = new chrome.Options();
-  options.addArguments('--headless'); // Run in headless mode (no GUI)
-  options.addArguments('--disable-gpu'); // Disable GPU for stability
-  options.addArguments('--no-sandbox'); // Use this to bypass sandboxing (Linux environments)
-  options.addArguments('--disable-dev-shm-usage'); // Overcome resource limits in some environments
-  options.addArguments('--remote-debugging-port=9222'); // Use remote debugging port (for debugging)
+  options.addArguments('--headless');
+  options.addArguments('--disable-gpu');
+  options.addArguments('--no-sandbox');
+  options.addArguments('--disable-dev-shm-usage');
+  options.addArguments('--remote-debugging-port=9222');
 
-  const driver = await new Builder()
-    .forBrowser('chrome')
-    .setChromeOptions(options)
-    .build();
+  const driver = await new Builder().forBrowser('chrome').setChromeOptions(options).build();
 
   try {
     console.log('Navigating to Twitter login...');
     await driver.get('https://x.com/i/flow/login');
 
-    // Step 1: Enter Email
-    await driver.wait(until.elementLocated(By.css('[autocomplete="username"]')), 30000);
+    // Wait for the login page to load
+    await driver.wait(until.elementLocated(By.css('[autocomplete="username"]')), 60000);
+
     const emailField = await driver.findElement(By.css('[autocomplete="username"]'));
-    await emailField.sendKeys('pawar.manav2304@gmail.com'); // Replace with your email
+    await emailField.sendKeys('pawar.manav2304@gmail.com');
     await driver.findElement(By.xpath("//span[text()='Next']")).click();
 
-    // Step 2: Enter Username (Intermediate Step)
-    await driver.wait(until.elementLocated(By.css('[name="text"]')), 30000); // Adjust selector if necessary
+    await driver.wait(until.elementLocated(By.css('[name="text"]')), 60000);
     const usernameField = await driver.findElement(By.css('[name="text"]'));
-    await usernameField.sendKeys('ManavPa47597105'); // Replace with your username
+    await usernameField.sendKeys('ManavPa47597105');
     await driver.findElement(By.xpath("//span[text()='Next']")).click();
 
-    // Step 3: Enter Password
-    await driver.wait(until.elementLocated(By.css('[autocomplete="current-password"]')), 30000);
+    await driver.wait(until.elementLocated(By.css('[autocomplete="current-password"]')), 60000);
     const passwordField = await driver.findElement(By.css('[autocomplete="current-password"]'));
-    await passwordField.sendKeys('Manav2304@'); // Replace with your password
+    await passwordField.sendKeys('Manav2304@');
     await driver.findElement(By.xpath("//span[text()='Log in']")).click();
 
-    // Wait for confirmation that login was successful
-    await driver.wait(until.elementLocated(By.css('[aria-label="Home"]')), 30000);
-
-    console.log(`Logged in successfully as @ManavPa47597105`);
+    // Wait for the Home element to load
+    await driver.wait(until.elementLocated(By.css('[aria-label="Home"]')), 60000);  // Increase wait time
+    console.log('Logged in successfully');
 
     // Wait for trends to load
-    await driver.wait(until.elementLocated(By.css('[data-testid="trend"]')), 30000);
+    await driver.wait(until.elementLocated(By.css('[data-testid="trend"]')), 60000); // Increase wait time
 
-    // Get trending topics
     const trends = await driver.findElements(By.css('[data-testid="trend"]'));
     const trendTexts = [];
     for (let i = 0; i < 6 && i < trends.length; i++) {
@@ -112,11 +106,8 @@ async function scrapeTrends() {
     return { trends: trendTexts };
   } catch (error) {
     console.error('Scrape operation failed:', error);
-
-    // Capture the page source for debugging
     const pageSource = await driver.getPageSource();
     console.error('Page Source:', pageSource);
-
     throw error;
   } finally {
     await driver.quit();
