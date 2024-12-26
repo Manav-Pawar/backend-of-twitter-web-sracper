@@ -5,6 +5,7 @@ import { Builder, By, until } from 'selenium-webdriver';
 import chrome from 'selenium-webdriver/chrome.js';
 import dotenv from 'dotenv';
 
+// Load environment variables from .env file
 dotenv.config();
 
 const app = express();
@@ -51,7 +52,7 @@ const TrendSchema = new mongoose.Schema({
   nameoftrend4: String,
   nameoftrend5: String,
   timestamp: Date,
-  ipAddress: String,
+  ipAddress: String, // Add IP address if needed
 });
 
 const Trend = mongoose.model('Trend', TrendSchema);
